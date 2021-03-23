@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">数字解锁</string>
+    <string name="delete" translatable="false">删除</string>
+    <string name="set_pwd_title" translatable="false">设置密码</string>
+    <string name="button_ok" translatable="false">确认</string>
+    <string name="button_back">返回</string>
+    <string name="prompt_info_less_four">请输入四位密码</string>
+    <string name="prompt_info_correct_password">密码正确！</string>
+</resources>

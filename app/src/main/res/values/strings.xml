@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">NumberUnlock</string>
+    <string name="delete">delete</string>
+    <string name="button_ok">OK</string>
+    <string name="button_back">Back</string>
+    <string name="set_pwd_title">Set Password</string>
+    <string name="prompt_info_less_four">Please input 4-digit password</string>
+    <string name="prompt_info_correct_password">Password correct!</string>
+</resources>
