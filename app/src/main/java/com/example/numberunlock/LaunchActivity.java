@@ -20,12 +20,7 @@ public class LaunchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
 
-//        if (android.os.Build.VERSION.SDK_INT > 9) {
-//            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-//            StrictMode.setThreadPolicy(policy);
-//        }
-
-        SetPasswordPanel setPasswordPanel = (SetPasswordPanel) findViewById(R.id.set_password);
+        SetPasswordPanel setPasswordPanel = findViewById(R.id.set_password);
         setPasswordPanel.setInputListener(new SetPasswordPanel.InputListener() {
             @Override
             public void inputFinish(String resultPwd, String resultForce, String duration) {

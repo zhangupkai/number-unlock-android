@@ -61,6 +61,20 @@ public class SetPasswordPanel extends LinearLayout {
     // 按键持续时间
     private Long mTime;
 
+    // 按下时的触摸面积
+    private Float mSizeAtDown;
+    // 释放时的触摸面积
+    private Float mSizeAtUp;
+    // 平均触摸面积
+    private Float avgSize;
+
+    // 按下时的触摸压力
+    private Float mPressureAtDown;
+    // 释放时的触摸压力
+    private Float mPressureAtUp;
+    // 平均触摸压力
+    private Float avgPressure;
+
     // 从远程服务端返回的预测结果
     private Integer serviceResult;
 
@@ -143,10 +157,12 @@ public class SetPasswordPanel extends LinearLayout {
                         case MotionEvent.ACTION_DOWN:
                             numBgIv.setFillCircle();
                             numTv.setTextColor(Color.WHITE);
-//                            float pressure = event.getPressure();
-//                            float size = event.getSize();
-//                            System.out.println("Pressure: " + pressure);
-//                            System.out.println("Size: " + size);
+
+                            mSizeAtDown = event.getSize();
+                            mPressureAtDown = event.getPressure();
+                            System.out.println("Size at Down: " + mSizeAtDown);
+                            System.out.println("Pressure at Down: " + mPressureAtDown);
+
                             if(mPassWord.length() < 4){
                                 mPassWord.append(numTv.getText());
                                 mResultIvList.get(mPassWord.length()-1).setFillCircle();
@@ -158,26 +174,31 @@ public class SetPasswordPanel extends LinearLayout {
                         case MotionEvent.ACTION_UP:
                             numBgIv.setStrokeCircle();
                             numTv.setTextColor(mPanelColor);
-                            mTime = event.getEventTime() - event.getDownTime() ;
+
+                            mSizeAtUp = event.getSize();
+                            mPressureAtUp = event.getPressure();
+                            System.out.println("Size at Up: " + mSizeAtUp);
+                            System.out.println("Pressure at Up: " + mPressureAtUp);
+
+                            avgSize = (mSizeAtDown + mSizeAtUp) / 2;
+                            avgPressure = (mPressureAtDown + mPressureAtUp) / 2;
+                            System.out.println("Avg Size: " + avgSize);
+                            System.out.println("Avg Pressure: " + avgPressure);
+
+                            mTime = event.getEventTime() - event.getDownTime();
                             System.out.println("Time: " + mTime);
                             Utils.writeFileToSDCard(mTime.toString().getBytes(), "NumberUnlock", "data.txt", true, true);
                             if (mForce.length() < 4) {
                                 RequestObject requestObject = new RequestObject();
                                 requestObject.setDuration(mTime);
+                                requestObject.setSizeAtDown(mSizeAtDown);
+                                requestObject.setSizeAtUp(mSizeAtUp);
+                                requestObject.setSizeAvg(avgSize);
+                                requestObject.setPressureAtDown(mPressureAtDown);
+                                requestObject.setPressureAtUp(mPressureAtUp);
+                                requestObject.setPressureAvg(avgPressure);
 
                                 // 连接Python服务
-//                                new Thread(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        try {
-//                                            ResponseObject responseObject = OkHttpUtil.post("http://192.168.2.42:5000/predict", requestObject);
-//                                            serviceResult = responseObject.getResult();
-//                                        } catch (IOException e) {
-//                                            e.printStackTrace();
-//                                        }
-//                                    }
-//                                }).start();
-
                                 ResponseObject responseObject = new ResponseObject();
                                 OkHttpClient client = new OkHttpClient();
 
