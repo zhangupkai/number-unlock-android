@@ -3,6 +3,7 @@ package com.example.numberunlock;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -42,6 +43,9 @@ public class NumLockPanel extends LinearLayout {
     // 存储输入的重按轻按信息
     private StringBuffer mForce;
 
+    // 存储每次输入的按压时长
+    private List<Long> mDuration = new ArrayList<>();
+
     //振动效果
     private Vibrator mVibrator;
     //整个键盘的颜色
@@ -78,6 +82,7 @@ public class NumLockPanel extends LinearLayout {
         initView(context);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     public void initView(Context context){
         //4个结果号码
         inputResultView = new LinearLayout(context);
@@ -135,19 +140,34 @@ public class NumLockPanel extends LinearLayout {
                         case MotionEvent.ACTION_UP:
                             numBgIv.setStrokeCircle();
                             numTv.setTextColor(mPanelColor);
-                            float mTime = event.getEventTime() - event.getDownTime() ;
-                            System.out.println("Time: " + mTime);
-                            if (mForce.length() < 4) {
-                                if (mTime >= 200) {
-                                    mForce.append("1");
+                            Long mTime = event.getEventTime() - event.getDownTime();
+                            System.out.println("Each Duration: " + mTime);
+                            mDuration.add(mTime);
+                            System.out.println("Duration List: " + mDuration);
+                            System.out.println("mPassword Size: " + mPassWord.length());
+
+                            if (mPassWord.length() == 4) {
+                                long sumDuration = 0;
+                                for (long duration : mDuration) {
+                                    sumDuration += duration;
                                 }
-                                else {
-                                    mForce.append("0");
-                                }
-                                if (mInputListener != null && mForce.length() == 4) {
-                                    mInputListener.inputFinish(mPassWord.toString(), mForce.toString());
+                                long avgDuration = sumDuration / mDuration.size();
+                                System.out.println("Avg Duration: " + avgDuration);
+
+
+                                for (long duration : mDuration) {
+                                    if (duration >= avgDuration) {
+                                        mForce.append("1");
+                                    }
+                                    else {
+                                        mForce.append("0");
+                                    }
+                                    if (mInputListener != null && mForce.length() == 4) {
+                                        mInputListener.inputFinish(mPassWord.toString(), mForce.toString());
+                                    }
                                 }
                             }
+
                             break;
                     }
                     return true;
@@ -263,12 +283,21 @@ public class NumLockPanel extends LinearLayout {
      * 删除
      */
     public void delete(){
-        if((mPassWord.length() == 0) || (mForce.length() == 0)){
-            return;
-        }
+//        if((mPassWord.length() == 0) || (mForce.length() == 0)){
+//            return;
+//        }
         mResultIvList.get(mPassWord.length()-1).setStrokeCircle();
-        mPassWord.deleteCharAt(mPassWord.length()-1);
-        mForce.deleteCharAt(mForce.length() - 1);
+        if (mPassWord.length() != 0) {
+            mPassWord.deleteCharAt(mPassWord.length()-1);
+        }
+        // TODO mForce删除逻辑要改 mDuration删除逻辑待添加
+        if (mForce.length() != 0) {
+            mForce.deleteCharAt(mForce.length() - 1);
+        }
+        if (mDuration != null && !mDuration.isEmpty()) {
+            mDuration.remove(mDuration.size() - 1);
+        }
+
     }
 
     /**
@@ -280,6 +309,7 @@ public class NumLockPanel extends LinearLayout {
         }
         mPassWord.delete(0, 4);
         mForce.delete(0, 4);
+        mDuration.clear();
     }
 
     /**

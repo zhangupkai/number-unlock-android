@@ -207,7 +207,7 @@ public class SetPasswordPanel extends LinearLayout {
                                 RequestBody body = FormBody.create(MediaType.parse("application/json"), json);
 
                                 Request request = new Request.Builder()
-                                        .url("http://192.168.2.42:5000/predict")
+                                        .url("http://42.193.125.42:7003/collect")
                                         .post(body)
                                         .build();
                                 Call call = client.newCall(request);
@@ -226,6 +226,15 @@ public class SetPasswordPanel extends LinearLayout {
                                             mForce.append("0");
                                         }
                                         System.out.println("After this touch: mPwd: " + mPassWord.toString() + ", mForce: " + mForce);
+                                        //处理UI需要切换到UI线程处理
+                                        ((LaunchActivity) context).runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                if (mInputListener != null && mPassWord.length() == 4) {
+                                                    mInputListener.inputFinish(mPassWord.toString(), mForce.toString(), mTime.toString());
+                                                }
+                                            }
+                                        });
                                     }
 
                                     @Override
