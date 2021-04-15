@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LaunchActivity">
+    tools:context=".activity.LaunchActivity">
 
-    <com.example.numberunlock.SetPasswordPanel
+    <com.example.numberunlock.panel.SetPasswordPanel
         android:id="@+id/set_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="200dp">
-    </com.example.numberunlock.SetPasswordPanel>
+    </com.example.numberunlock.panel.SetPasswordPanel>
 
     <TextView
         android:id="@+id/textView2"

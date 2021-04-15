@@ -1,4 +1,4 @@
-package com.example.numberunlock;
+package com.example.numberunlock.panel;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
@@ -21,14 +21,30 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.numberunlock.R;
+import com.example.numberunlock.activity.LaunchActivity;
+import com.example.numberunlock.pojo.RequestObject;
+import com.example.numberunlock.pojo.ResponseObject;
+import com.google.gson.Gson;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 import static android.widget.RelativeLayout.CENTER_HORIZONTAL;
 import static android.widget.RelativeLayout.CENTER_IN_PARENT;
 
 
-public class NumLockPanel extends LinearLayout {
+public class SetPasswordPanel extends LinearLayout {
     private String[] numArr = new String[]{"1","2","3","4","5","6","7","8","9", "", "0"};
 
     private int mPaddingLeftRight;
@@ -43,8 +59,25 @@ public class NumLockPanel extends LinearLayout {
     // 存储输入的重按轻按信息
     private StringBuffer mForce;
 
-    // 存储每次输入的按压时长
-    private List<Long> mDuration = new ArrayList<>();
+    // 按键持续时间
+    private Long mTime;
+
+    // 按下时的触摸面积
+    private Float mSizeAtDown;
+    // 释放时的触摸面积
+    private Float mSizeAtUp;
+    // 平均触摸面积
+    private Float avgSize;
+
+    // 按下时的触摸压力
+    private Float mPressureAtDown;
+    // 释放时的触摸压力
+    private Float mPressureAtUp;
+    // 平均触摸压力
+    private Float avgPressure;
+
+    // 从远程服务端返回的预测结果
+    private Integer serviceResult;
 
     //振动效果
     private Vibrator mVibrator;
@@ -57,15 +90,15 @@ public class NumLockPanel extends LinearLayout {
     //每个圆的边界宽度
     private int mStrokeWidth;
 
-    public NumLockPanel(Context context) {
+    public SetPasswordPanel(Context context) {
         this(context, null);
     }
 
-    public NumLockPanel(Context context, AttributeSet attrs) {
+    public SetPasswordPanel(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public NumLockPanel(Context context, AttributeSet attrs, int defStyleAttr) {
+    public SetPasswordPanel(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mPaddingLeftRight = dip2px(context, 21);
         mPaddingTopBottom = dip2px(context, 10);
@@ -89,14 +122,14 @@ public class NumLockPanel extends LinearLayout {
         for(int i=0; i<4; i++){
             CircleImageView mResultItem = new CircleImageView(context);
             mResultIvList.add(mResultItem);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(mResultIvRadius, mResultIvRadius);
+            LayoutParams params = new LayoutParams(mResultIvRadius, mResultIvRadius);
             params.leftMargin = dip2px(context, 4);
             params.rightMargin = dip2px(context, 4);
             mResultItem.setPadding(dip2px(context, 2),dip2px(context, 2),dip2px(context, 2),dip2px(context, 2));
             mResultItem.setLayoutParams(params);
             inputResultView.addView(mResultItem);
         }
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.gravity = Gravity.CENTER_HORIZONTAL;
         params.bottomMargin = dip2px(context, 34);
         inputResultView.setLayoutParams(params);
@@ -125,10 +158,12 @@ public class NumLockPanel extends LinearLayout {
                         case MotionEvent.ACTION_DOWN:
                             numBgIv.setFillCircle();
                             numTv.setTextColor(Color.WHITE);
-//                            float pressure = event.getPressure();
-//                            float size = event.getSize();
-//                            System.out.println("Pressure: " + pressure);
-//                            System.out.println("Size: " + size);
+
+                            mSizeAtDown = event.getSize();
+                            mPressureAtDown = event.getPressure();
+                            System.out.println("Size at Down: " + mSizeAtDown);
+                            System.out.println("Pressure at Down: " + mPressureAtDown);
+
                             if(mPassWord.length() < 4){
                                 mPassWord.append(numTv.getText());
                                 mResultIvList.get(mPassWord.length()-1).setFillCircle();
@@ -140,34 +175,98 @@ public class NumLockPanel extends LinearLayout {
                         case MotionEvent.ACTION_UP:
                             numBgIv.setStrokeCircle();
                             numTv.setTextColor(mPanelColor);
-                            Long mTime = event.getEventTime() - event.getDownTime();
-                            System.out.println("Each Duration: " + mTime);
-                            mDuration.add(mTime);
-                            System.out.println("Duration List: " + mDuration);
-                            System.out.println("mPassword Size: " + mPassWord.length());
 
-                            if (mPassWord.length() == 4) {
-                                long sumDuration = 0;
-                                for (long duration : mDuration) {
-                                    sumDuration += duration;
-                                }
-                                long avgDuration = sumDuration / mDuration.size();
-                                System.out.println("Avg Duration: " + avgDuration);
+                            mSizeAtUp = event.getSize();
+                            mPressureAtUp = event.getPressure();
+                            System.out.println("Size at Up: " + mSizeAtUp);
+                            System.out.println("Pressure at Up: " + mPressureAtUp);
 
+                            avgSize = (mSizeAtDown + mSizeAtUp) / 2;
+                            avgPressure = (mPressureAtDown + mPressureAtUp) / 2;
+                            System.out.println("Avg Size: " + avgSize);
+                            System.out.println("Avg Pressure: " + avgPressure);
 
-                                for (long duration : mDuration) {
-                                    if (duration >= avgDuration) {
-                                        mForce.append("1");
+                            mTime = event.getEventTime() - event.getDownTime();
+                            System.out.println("Time: " + mTime);
+//                            Utils.writeFileToSDCard(mTime.toString().getBytes(), "NumberUnlock", "data.txt", true, true);
+                            if (mForce.length() < 4) {
+                                RequestObject requestObject = new RequestObject();
+                                requestObject.setDuration(mTime);
+                                requestObject.setSizeAtDown(mSizeAtDown);
+                                requestObject.setSizeAtUp(mSizeAtUp);
+                                requestObject.setSizeAvg(avgSize);
+                                requestObject.setPressureAtDown(mPressureAtDown);
+                                requestObject.setPressureAtUp(mPressureAtUp);
+                                requestObject.setPressureAvg(avgPressure);
+
+                                // 连接Python服务
+                                ResponseObject responseObject = new ResponseObject();
+                                OkHttpClient client = new OkHttpClient();
+
+                                Gson gson = new Gson();
+                                String json = gson.toJson(requestObject);
+                                RequestBody body = FormBody.create(MediaType.parse("application/json"), json);
+
+                                Request request = new Request.Builder()
+                                        .url("http://42.193.125.42:7003/collect")
+                                        .post(body)
+                                        .build();
+                                Call call = client.newCall(request);
+
+                                // 异步请求
+                                call.enqueue(new Callback() {
+                                    @Override
+                                    public void onFailure(Call call, IOException e) {
+                                        System.out.println("连接失败！");
+                                        e.printStackTrace();
+                                        System.out.println("网络连接失败，使用默认值");
+                                        if (mTime >= 200) {
+                                            mForce.append("1");
+                                        }
+                                        else {
+                                            mForce.append("0");
+                                        }
+                                        System.out.println("After this touch: mPwd: " + mPassWord.toString() + ", mForce: " + mForce);
+                                        //处理UI需要切换到UI线程处理
+                                        ((LaunchActivity) context).runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                if (mInputListener != null && mPassWord.length() == 4) {
+                                                    mInputListener.inputFinish(mPassWord.toString(), mForce.toString(), mTime.toString());
+                                                }
+                                            }
+                                        });
                                     }
-                                    else {
-                                        mForce.append("0");
+
+                                    @Override
+                                    public void onResponse(Call call, Response response) throws IOException {
+                                        if(response.isSuccessful()){
+                                            String resultJson = response.body().string();
+                                            System.out.println("返回值： "+resultJson);
+                                            serviceResult = gson.fromJson(resultJson, ResponseObject.class).getResult();
+                                            if (serviceResult == 1) {
+                                                mForce.append("1");
+                                                System.out.println("使用了 在线输出 " + serviceResult);
+                                            }
+                                            else if (serviceResult == 0) {
+                                                mForce.append("0");
+                                                System.out.println("使用了 在线输出 " + serviceResult);
+                                            }
+                                            System.out.println("After this touch: mPwd: " + mPassWord.toString() + ", mForce: " + mForce);
+
+                                            //处理UI需要切换到UI线程处理
+                                            ((LaunchActivity) context).runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    if (mInputListener != null && mPassWord.length() == 4) {
+                                                        mInputListener.inputFinish(mPassWord.toString(), mForce.toString(), mTime.toString());
+                                                    }
+                                                }
+                                            });
+                                        }
                                     }
-                                    if (mInputListener != null && mForce.length() == 4) {
-                                        mInputListener.inputFinish(mPassWord.toString(), mForce.toString());
-                                    }
-                                }
+                                });
                             }
-
                             break;
                     }
                     return true;
@@ -207,7 +306,7 @@ public class NumLockPanel extends LinearLayout {
             }
         });
 
-        LinearLayout.LayoutParams gridParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LayoutParams gridParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         gridParams.gravity = Gravity.CENTER_HORIZONTAL;
         numContainer.setLayoutParams(gridParams);
         addView(numContainer);
@@ -283,21 +382,12 @@ public class NumLockPanel extends LinearLayout {
      * 删除
      */
     public void delete(){
-//        if((mPassWord.length() == 0) || (mForce.length() == 0)){
-//            return;
-//        }
+        if((mPassWord.length() == 0) || (mForce.length() == 0)){
+            return;
+        }
         mResultIvList.get(mPassWord.length()-1).setStrokeCircle();
-        if (mPassWord.length() != 0) {
-            mPassWord.deleteCharAt(mPassWord.length()-1);
-        }
-        // TODO mForce删除逻辑要改 mDuration删除逻辑待添加
-        if (mForce.length() != 0) {
-            mForce.deleteCharAt(mForce.length() - 1);
-        }
-        if (mDuration != null && !mDuration.isEmpty()) {
-            mDuration.remove(mDuration.size() - 1);
-        }
-
+        mPassWord.deleteCharAt(mPassWord.length()-1);
+        mForce.deleteCharAt(mForce.length() - 1);
     }
 
     /**
@@ -309,7 +399,6 @@ public class NumLockPanel extends LinearLayout {
         }
         mPassWord.delete(0, 4);
         mForce.delete(0, 4);
-        mDuration.clear();
     }
 
     /**
@@ -322,7 +411,7 @@ public class NumLockPanel extends LinearLayout {
     }
 
     public interface InputListener{
-        void inputFinish(String resultPwd, String resultForce);
+        void inputFinish(String resultPwd, String resultForce, String duration);
 //        void inputFinishForce(String forceResult);
     }
 

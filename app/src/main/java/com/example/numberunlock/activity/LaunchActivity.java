@@ -1,14 +1,16 @@
-package com.example.numberunlock;
+package com.example.numberunlock.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.numberunlock.R;
+import com.example.numberunlock.panel.SetPasswordPanel;
+import com.example.numberunlock.Utils;
 
 public class LaunchActivity extends AppCompatActivity {
 

@@ -6,4 +6,6 @@
     <string name="set_pwd_title">Set Password</string>
     <string name="prompt_info_less_four">Please input 4-digit password</string>
     <string name="prompt_info_correct_password">Password correct!</string>
+    <string name="enter_eye" translatable="false">Enter "EYE"</string>
+    <string name="exit_eye" translatable="false">Exit "EYE"</string>
 </resources>
