@@ -75,6 +75,8 @@ public class BackgroundVideoRecorderService extends Service implements SurfaceHo
         System.out.println("Support:" + camera.getParameters());
         Camera.Parameters parameters = camera.getParameters();
         camera.setParameters(parameters);
+        // 设置录制视频的角度
+        camera.setDisplayOrientation(90);
 
         // unlock 一定要在实例化MediaRecorder之前，这是天坑！
         camera.unlock();
@@ -86,19 +88,13 @@ public class BackgroundVideoRecorderService extends Service implements SurfaceHo
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_1080P));
 
-//        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
-//        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
-//        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-//        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-//        mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
-//        mediaRecorder.setVideoSize(320, 240);
-//        mediaRecorder.setVideoFrameRate(20);
-
         mediaRecorder.setOutputFile(
                 Environment.getExternalStorageDirectory() + "/NumberUnlock/" +
                         DateFormat.format("yyyy-MM-dd_kk-mm-ss", new Date().getTime()) +
                         ".mp4"
         );
+        // 设置输出视频的播放角度
+        mediaRecorder.setOrientationHint(270);
 
         try {
             mediaRecorder.prepare();
