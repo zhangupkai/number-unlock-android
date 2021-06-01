@@ -69,27 +69,27 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //
-        Button enterEyeButton = (Button) findViewById(R.id.enter_eye_button);
-        enterEyeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Enter Eye", Toast.LENGTH_LONG).show();
-
-                // 绑定Service
-                Intent intent = new Intent();
-                intent.setClass(MainActivity.this, BackgroundVideoRecorderService.class);
-                bindService(intent, connection, Context.BIND_AUTO_CREATE);
-            }
-        });
-
-        Button exitEyeButton = (Button) findViewById(R.id.exit_eye_button);
-        exitEyeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Exit Eye", Toast.LENGTH_LONG).show();
-                unbindService(connection);
-            }
-        });
+//        Button enterEyeButton = (Button) findViewById(R.id.enter_eye_button);
+//        enterEyeButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Toast.makeText(MainActivity.this, "Enter Eye", Toast.LENGTH_LONG).show();
+//
+//                // 绑定Service
+//                Intent intent = new Intent();
+//                intent.setClass(MainActivity.this, BackgroundVideoRecorderService.class);
+//                bindService(intent, connection, Context.BIND_AUTO_CREATE);
+//            }
+//        });
+//
+//        Button exitEyeButton = (Button) findViewById(R.id.exit_eye_button);
+//        exitEyeButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Toast.makeText(MainActivity.this, "Exit Eye", Toast.LENGTH_LONG).show();
+//                unbindService(connection);
+//            }
+//        });
     }
 
 }

@@ -142,35 +142,48 @@ public class NumLockPanel extends LinearLayout {
                         case MotionEvent.ACTION_UP:
                             numBgIv.setStrokeCircle();
                             numTv.setTextColor(mPanelColor);
-                            Long mTime = event.getEventTime() - event.getDownTime();
+                            long mTime = event.getEventTime() - event.getDownTime();
                             System.out.println("Each Duration: " + mTime);
                             mDuration.add(mTime);
                             System.out.println("Duration List: " + mDuration);
                             System.out.println("mPassword Size: " + mPassWord.length());
 
-                            if (mPassWord.length() == 4) {
-                                long sumDuration = 0;
-                                for (long duration : mDuration) {
-                                    sumDuration += duration;
+                            if (mForce.length() < 4) {
+                                if (mTime > 200) {
+                                    mForce.append("1");
                                 }
-                                long avgDuration = sumDuration / mDuration.size();
-                                System.out.println("Avg Duration: " + avgDuration);
+                                else {
+                                    mForce.append("0");
+                                }
 
-
-                                for (long duration : mDuration) {
-                                    if (duration >= avgDuration) {
-                                        mForce.append("1");
-                                    }
-                                    else {
-                                        mForce.append("0");
-                                    }
-                                    if (mInputListener != null && mForce.length() == 4) {
-                                        mInputListener.inputFinish(mPassWord.toString(), mForce.toString());
-                                    }
+                                if (mInputListener != null && mForce.length() == 4) {
+                                    mInputListener.inputFinish(mPassWord.toString(), mForce.toString());
                                 }
                             }
 
                             break;
+//                            if (mPassWord.length() == 4) {
+//                                long sumDuration = 0;
+//                                for (long duration : mDuration) {
+//                                    sumDuration += duration;
+//                                }
+//                                long avgDuration = sumDuration / mDuration.size();
+//                                System.out.println("Avg Duration: " + avgDuration);
+//
+//
+//                                for (long duration : mDuration) {
+//                                    if (duration >= avgDuration) {
+//                                        mForce.append("1");
+//                                    }
+//                                    else {
+//                                        mForce.append("0");
+//                                    }
+//                                    if (mInputListener != null && mForce.length() == 4) {
+//                                        mInputListener.inputFinish(mPassWord.toString(), mForce.toString());
+//                                    }
+//                                }
+//                            }
+//                            break;
                     }
                     return true;
                 }

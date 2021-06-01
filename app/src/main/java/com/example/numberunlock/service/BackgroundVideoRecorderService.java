@@ -104,31 +104,6 @@ public class BackgroundVideoRecorderService extends Service implements SurfaceHo
         }
         mediaRecorder.start();
 
-
-//        System.out.println("Camera Start");
-//        camera = Camera.open();
-//        mediaRecorder = new MediaRecorder();
-//        camera.unlock();
-//
-//        mediaRecorder.setPreviewDisplay(surfaceHolder.getSurface());
-//        mediaRecorder.setCamera(camera);
-//        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
-//        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-//        mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
-//
-//        mediaRecorder.setOutputFile(
-//                Environment.getExternalStorageDirectory() + "/" +
-//                        DateFormat.format("yyyy-MM-dd_kk-mm-ss", new Date().getTime()) +
-//                        ".mp4"
-//        );
-//
-//        try {
-//            mediaRecorder.prepare();
-//        }
-//        catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        mediaRecorder.start();
     }
 
     @Override

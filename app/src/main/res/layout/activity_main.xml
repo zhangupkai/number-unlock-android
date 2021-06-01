@@ -30,22 +30,22 @@
         android:layout_centerHorizontal="true"
         android:text="@string/button_back" />
 
-    <Button
-        android:id="@+id/enter_eye_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="650dp"
-        android:layout_centerHorizontal="true"
-        android:text="@string/enter_eye"
-        />
+<!--    <Button-->
+<!--        android:id="@+id/enter_eye_button"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="650dp"-->
+<!--        android:layout_centerHorizontal="true"-->
+<!--        android:text="@string/enter_eye"-->
+<!--        />-->
 
-    <Button
-        android:id="@+id/exit_eye_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="690dp"
-        android:layout_centerHorizontal="true"
-        android:text="@string/exit_eye"
-        />
+<!--    <Button-->
+<!--        android:id="@+id/exit_eye_button"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="690dp"-->
+<!--        android:layout_centerHorizontal="true"-->
+<!--        android:text="@string/exit_eye"-->
+<!--        />-->
 
 </RelativeLayout>
