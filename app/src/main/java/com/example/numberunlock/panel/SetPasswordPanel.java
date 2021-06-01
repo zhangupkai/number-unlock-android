@@ -6,6 +6,7 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -58,6 +59,9 @@ public class SetPasswordPanel extends LinearLayout {
 
     // 存储输入的重按轻按信息
     private StringBuffer mForce;
+
+    // 重按按键个数
+    private int mHeavyCount = 0;
 
     // 按键持续时间
     private Long mTime;
@@ -222,11 +226,13 @@ public class SetPasswordPanel extends LinearLayout {
                                         System.out.println("网络连接失败，使用默认值");
                                         if (mTime >= 200) {
                                             mForce.append("1");
+                                            mHeavyCount++;
                                         }
                                         else {
                                             mForce.append("0");
                                         }
                                         System.out.println("After this touch: mPwd: " + mPassWord.toString() + ", mForce: " + mForce);
+
                                         //处理UI需要切换到UI线程处理
                                         ((LaunchActivity) context).runOnUiThread(new Runnable() {
                                             @Override
@@ -246,6 +252,7 @@ public class SetPasswordPanel extends LinearLayout {
                                             serviceResult = gson.fromJson(resultJson, ResponseObject.class).getResult();
                                             if (serviceResult == 1) {
                                                 mForce.append("1");
+                                                mHeavyCount++;
                                                 System.out.println("使用了 在线输出 " + serviceResult);
                                             }
                                             else if (serviceResult == 0) {

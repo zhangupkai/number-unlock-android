@@ -157,7 +157,7 @@ public class NumLockPanel extends LinearLayout {
                                 }
 
                                 if (mInputListener != null && mForce.length() == 4) {
-                                    mInputListener.inputFinish(mPassWord.toString(), mForce.toString());
+                                    mInputListener.inputFinish(mPassWord.toString(), mForce.toString(), mDuration);
                                 }
                             }
 
@@ -337,7 +337,7 @@ public class NumLockPanel extends LinearLayout {
     }
 
     public interface InputListener{
-        void inputFinish(String resultPwd, String resultForce);
+        void inputFinish(String resultPwd, String resultForce, List<Long> durationList);
 //        void inputFinishForce(String forceResult);
     }
 

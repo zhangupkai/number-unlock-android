@@ -16,6 +16,7 @@ public class LaunchActivity extends AppCompatActivity {
 
     private String inputPwd;
     private String inputForce;
+    private int heavyCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +46,7 @@ public class LaunchActivity extends AppCompatActivity {
                     intent.setClass(LaunchActivity.this, MainActivity.class);
                     intent.putExtra("inputPwd", inputPwd);
                     intent.putExtra("inputForce", inputForce);
+                    intent.putExtra("heavyCount", heavyCount);
                     startActivity(intent);
                 }
             }
