@@ -22,9 +22,26 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.numberunlock.R;
+import com.example.numberunlock.activity.LaunchActivity;
+import com.example.numberunlock.activity.MainActivity;
+import com.example.numberunlock.pojo.RequestObject;
+import com.example.numberunlock.pojo.ResponseObject;
+import com.example.numberunlock.pojo.ScenesJudgeReq;
+import com.example.numberunlock.pojo.ScenesJudgeRsp;
+import com.google.gson.Gson;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 import static android.widget.RelativeLayout.CENTER_HORIZONTAL;
 import static android.widget.RelativeLayout.CENTER_IN_PARENT;
@@ -45,8 +62,14 @@ public class NumLockPanel extends LinearLayout {
     // 存储输入的重按轻按信息
     private StringBuffer mForce;
 
+    // 按键持续时间
+    private Long mTime;
+
     // 存储每次输入的按压时长
     private List<Long> mDuration = new ArrayList<>();
+
+    // 从远程服务端返回的预测结果
+    private String serviceResult;
 
     //振动效果
     private Vibrator mVibrator;
@@ -142,48 +165,108 @@ public class NumLockPanel extends LinearLayout {
                         case MotionEvent.ACTION_UP:
                             numBgIv.setStrokeCircle();
                             numTv.setTextColor(mPanelColor);
-                            long mTime = event.getEventTime() - event.getDownTime();
+                            mTime = event.getEventTime() - event.getDownTime();
                             System.out.println("Each Duration: " + mTime);
                             mDuration.add(mTime);
                             System.out.println("Duration List: " + mDuration);
                             System.out.println("mPassword Size: " + mPassWord.length());
 
-                            if (mForce.length() < 4) {
-                                if (mTime > 200) {
-                                    mForce.append("1");
-                                }
-                                else {
-                                    mForce.append("0");
-                                }
-
-                                if (mInputListener != null && mForce.length() == 4) {
-                                    mInputListener.inputFinish(mPassWord.toString(), mForce.toString(), mDuration);
-                                }
-                            }
-
-                            break;
-//                            if (mPassWord.length() == 4) {
-//                                long sumDuration = 0;
-//                                for (long duration : mDuration) {
-//                                    sumDuration += duration;
+//                            if (mForce.length() < 4) {
+//                                if (mTime > 200) {
+//                                    mForce.append("1");
 //                                }
-//                                long avgDuration = sumDuration / mDuration.size();
-//                                System.out.println("Avg Duration: " + avgDuration);
+//                                else {
+//                                    mForce.append("0");
+//                                }
 //
-//
-//                                for (long duration : mDuration) {
-//                                    if (duration >= avgDuration) {
-//                                        mForce.append("1");
-//                                    }
-//                                    else {
-//                                        mForce.append("0");
-//                                    }
-//                                    if (mInputListener != null && mForce.length() == 4) {
-//                                        mInputListener.inputFinish(mPassWord.toString(), mForce.toString());
-//                                    }
+//                                if (mInputListener != null && mForce.length() == 4) {
+//                                    mInputListener.inputFinish(mPassWord.toString(), mForce.toString(), mDuration);
 //                                }
 //                            }
-//                            break;
+
+                            System.out.println("mInputListener: " + mInputListener);
+                            System.out.println("mDuration Size: " + mDuration.size());
+                            if (mInputListener != null && mDuration.size() == 4) {
+                                System.out.println("Start Http...");
+
+                                ScenesJudgeReq scenesJudgeReq = new ScenesJudgeReq();
+                                scenesJudgeReq.setDurationList(mDuration);
+
+                                OkHttpClient client = new OkHttpClient();
+                                Gson gson = new Gson();
+                                String json = gson.toJson(scenesJudgeReq);
+                                RequestBody body = FormBody.create(MediaType.parse("application/json"), json);
+
+                                Request request = new Request.Builder()
+                                        .url("http://42.193.125.42:7003/scenes_collect_and_judge")
+                                        .post(body)
+                                        .build();
+                                Call call = client.newCall(request);
+
+                                System.out.println("Http Process 1...");
+
+                                // 异步请求
+                                call.enqueue(new Callback() {
+                                    @Override
+                                    public void onFailure(Call call, IOException e) {
+                                        System.out.println("连接失败！");
+                                        e.printStackTrace();
+                                        System.out.println("网络连接失败，使用默认值");
+                                        float sumDuration = 0;
+                                        for (Long duration : mDuration) {
+                                            sumDuration += duration;
+                                        }
+                                        float avgDuration = sumDuration / 4;
+                                        System.out.println("avg: " + avgDuration);
+
+                                        for (Long duration: mDuration) {
+                                            // 如果当前按压时长大于平均按压时长的50%，则认为其是重按
+                                            if ((duration - avgDuration) / avgDuration > 0.5){
+                                                mForce.append("1");
+                                                System.out.println("使用了 本地输出 1");
+                                            }
+                                            else {
+                                                mForce.append("0");
+                                                System.out.println("使用了 本地输出 0");
+                                            }
+                                            System.out.println("mPwd: " + mPassWord.toString() + ", mForce: " + mForce);
+                                        }
+
+                                        //处理UI需要切换到UI线程处理
+                                        ((MainActivity) context).runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                mInputListener.inputFinish(mPassWord.toString(), mForce.toString());
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onResponse(Call call, Response response) throws IOException {
+                                        if(response.isSuccessful()){
+                                            String resultJson = response.body().string();
+                                            System.out.println("返回值： "+resultJson);
+                                            serviceResult = gson.fromJson(resultJson, ScenesJudgeRsp.class).getResult();
+                                            System.out.println("使用了 在线输出 " + serviceResult);
+
+                                            mForce.append(serviceResult);
+
+                                            System.out.println("mPwd: " + mPassWord.toString() + ", mForce: " + mForce);
+
+                                            //处理UI需要切换到UI线程处理
+                                            ((MainActivity) context).runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    mInputListener.inputFinish(mPassWord.toString(), mForce.toString());
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+
+//                                mInputListener.inputFinish(mPassWord.toString(), mForce.toString());
+                            }
+                            break;
                     }
                     return true;
                 }
@@ -337,7 +420,8 @@ public class NumLockPanel extends LinearLayout {
     }
 
     public interface InputListener{
-        void inputFinish(String resultPwd, String resultForce, List<Long> durationList);
+//        void inputFinish(String resultPwd, String resultForce, List<Long> durationList);
+        void inputFinish(String resultPwd, String resultForce);
 //        void inputFinishForce(String forceResult);
     }
 

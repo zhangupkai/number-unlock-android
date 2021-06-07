@@ -212,7 +212,7 @@ public class SetPasswordPanel extends LinearLayout {
                                 RequestBody body = FormBody.create(MediaType.parse("application/json"), json);
 
                                 Request request = new Request.Builder()
-                                        .url("http://42.193.125.42:7003/collect")
+                                        .url("http://42.193.125.42:7003/collect_and_judge")
                                         .post(body)
                                         .build();
                                 Call call = client.newCall(request);
@@ -252,7 +252,6 @@ public class SetPasswordPanel extends LinearLayout {
                                             serviceResult = gson.fromJson(resultJson, ResponseObject.class).getResult();
                                             if (serviceResult == 1) {
                                                 mForce.append("1");
-                                                mHeavyCount++;
                                                 System.out.println("使用了 在线输出 " + serviceResult);
                                             }
                                             else if (serviceResult == 0) {

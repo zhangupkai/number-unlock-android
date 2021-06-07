@@ -53,62 +53,28 @@ public class MainActivity extends AppCompatActivity {
         numLockPanel.setInputListener(new NumLockPanel.InputListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
-            public void inputFinish(String resultPwd, String resultForce, List<Long> durationList) {
+//            public void inputFinish(String resultPwd, String resultForce, List<Long> durationList) {
+            public void inputFinish(String resultPwd, String resultForce) {
 
-                // 深拷贝List
-//                List<Long> sortedList = new ArrayList<>();
-//                for (Long duration: durationList) {
-//                    sortedList.add(duration);
+//                float sumDuration = 0;
+//                for (Long duration : durationList) {
+//                    sumDuration += duration;
 //                }
-
-                // 升序排序按压时长
-//                Collections.sort(sortedList);
+//                float avgDuration = sumDuration / 4;
+//                System.out.println("avg: " + avgDuration);
 //
-//                System.out.println("durationList: " + durationList);
-//                System.out.println("sortedList: " + sortedList);
-
-                float sumDuration = 0;
-                for (Long duration : durationList) {
-                    sumDuration += duration;
-                }
-                float avgDuration = sumDuration / 4;
-                System.out.println("avg: " + avgDuration);
-
-
-                // 重按和轻按的边界值
-//                long boundaryForce = 0;
-////                switch (heavyCount) {
-////                    // heavyCount = 0, 都是轻按
-//                    case 0:
-//                        boundaryForce = sortedList.get(3) + 1;
-//                        break;
-//                    case 1:
-//                        boundaryForce = (sortedList.get(3) + sortedList.get(2)) / 2;
-//                        break;
-//                    case 2:
-//                        boundaryForce = (sortedList.get(2) + sortedList.get(1)) / 2;
-//                        break;
-//                    case 3:
-//                        boundaryForce = (sortedList.get(1) + sortedList.get(0)) / 2;
-//                        break;
-//                    case 4:
-//                        boundaryForce = sortedList.get(0) - 1;
-//                        break;
+//                StringBuilder resultForceBuilder = new StringBuilder();
+//                for (Long duration: durationList) {
+//                    // 如果当前按压时长大于平均按压时长的50%，则认为其是重按
+//                    if ((duration - avgDuration) / avgDuration > 0.5){
+//                        resultForceBuilder.append("1");
+//                    }
+//                    else {
+//                        resultForceBuilder.append("0");
+//                    }
 //                }
-
-                StringBuilder resultForceBuilder = new StringBuilder();
-                for (Long duration: durationList) {
-//                    System.out.println("1: " + Math.abs(duration - avgDuration));
-//                    System.out.println("2:" + (Math.abs(duration - avgDuration) / avgDuration));
-                    if ((duration - avgDuration) / avgDuration > 0.5){
-                        resultForceBuilder.append("1");
-                    }
-                    else {
-                        resultForceBuilder.append("0");
-                    }
-                }
-                resultForce = resultForceBuilder.toString();
-                System.out.println("resultForceAfterCal: " + resultForce);
+//                resultForce = resultForceBuilder.toString();
+//                System.out.println("resultForceAfterCal: " + resultForce);
 
                 if (resultPwd.equals(correctPwd) && resultForce.equals(correctForce)) {
                     Toast.makeText(MainActivity.this, R.string.prompt_info_correct_password, Toast.LENGTH_LONG).show();
